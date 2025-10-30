@@ -1,0 +1,11 @@
+"""Test data files for loadbalancer pool tests."""
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(glob(["*.json", "*.txt"]))
+
+filegroup(
+    name = "test_data",
+    srcs = glob(["*.json", "*.txt"]),
+    visibility = ["//visibility:public"],
+)

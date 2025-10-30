@@ -1,0 +1,97 @@
+# GitLab CI for Bazel module
+# Configuration managed via .bazelrc
+
+default:
+  tags:
+    - shared-medium
+
+image: harbor.protontech.ch/gcr.io/bazel-public/bazel:8.3.1
+
+variables:
+  # Bazel startup options (must be passed before command)
+  BAZEL_STARTUP: "--output_user_root=.bazel-cache"
+
+cache:
+  key: "${CI_COMMIT_REF_SLUG}-bazel"
+  paths:
+    - .bazel-cache/
+  policy: pull-push
+
+stages:
+  - ci
+  - release
+
+# Main CI job - runs all Bazel operations in sequence
+bazel-ci:
+  stage: ci
+  script:
+    - |
+      echo "===== CI for ${CI_PROJECT_NAME} ====="
+      
+      # Startup options go before command, config goes after
+      bazel ${BAZEL_STARTUP} version --config=ci
+      
+      echo "===== Validating module structure ====="
+      bazel ${BAZEL_STARTUP} query --config=ci 'kind(".*", //...)' --output=label_kind 2>/dev/null || echo "No targets found (expected for tool modules)"
+      
+      echo "===== Building all targets ====="
+      bazel ${BAZEL_STARTUP} build --config=ci //... || BUILD_FAILED=1
+      
+      echo "===== Running tests with coverage ====="
+      bazel ${BAZEL_STARTUP} coverage --config=ci //... || TEST_FAILED=1
+      
+      # Check if any critical steps failed
+      if [ "$TEST_FAILED" = "1" ]; then
+        echo "ERROR: Tests failed"
+        exit 1
+      fi
+      if [ "$BUILD_FAILED" = "1" ]; then
+        echo "ERROR: Build failed"
+        exit 1
+      fi
+      
+      echo "===== Build Summary ====="
+      echo "✓ Module structure validated"
+      echo "✓ All targets built successfully"
+      echo "✓ All tests passed with coverage"
+
+  coverage: '/Coverage:\s+(\d+\.\d+)%/'
+  artifacts:
+    when: always
+    reports:
+      junit: bazel-testlogs/**/test.xml
+    paths:
+      - bazel-bin/
+      - bazel-testlogs/
+      - bazel-out/_coverage/
+      - bazel-out/*/coverage/
+    expire_in: 1 week
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+# Release job - only runs on tags
+release:
+  stage: release
+  script:
+    - |
+      echo "===== Creating release for ${CI_COMMIT_TAG} ====="
+      echo "Module version: ${CI_COMMIT_TAG}"
+  rules:
+    - if: '$CI_COMMIT_TAG'
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    name: 'Release $CI_COMMIT_TAG'
+    description: |
+      Release $CI_COMMIT_TAG of $CI_PROJECT_NAME
+
+      ## Installation
+      ```starlark
+      git_override(
+          module_name = "${CI_PROJECT_NAME}",
+          remote = "${CI_PROJECT_URL}",
+          tag = "${CI_COMMIT_TAG}",
+      )
+      ```

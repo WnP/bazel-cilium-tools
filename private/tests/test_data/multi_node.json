@@ -1,0 +1,32 @@
+{
+  "apiVersion": "v1",
+  "kind": "NodeList",
+  "items": [
+    {
+      "metadata": {
+        "name": "control-plane"
+      },
+      "status": {
+        "addresses": [
+          {
+            "address": "172.18.0.3",
+            "type": "InternalIP"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "worker"
+      },
+      "status": {
+        "addresses": [
+          {
+            "address": "172.18.0.2",
+            "type": "InternalIP"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+# Ignore the Bazel cache directory to prevent query/build issues
+.bazel-cache/

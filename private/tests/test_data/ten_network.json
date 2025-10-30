@@ -1,0 +1,10 @@
+{
+  "status": {
+    "addresses": [
+      {
+        "address": "10.244.0.1",
+        "type": "InternalIP"
+      }
+    ]
+  }
+}

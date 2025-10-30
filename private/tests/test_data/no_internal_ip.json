@@ -1,0 +1,14 @@
+{
+  "status": {
+    "addresses": [
+      {
+        "address": "test-node",
+        "type": "Hostname"
+      },
+      {
+        "address": "203.0.113.1",
+        "type": "ExternalIP"
+      }
+    ]
+  }
+}

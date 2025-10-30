@@ -1,0 +1,20 @@
+"""Build configuration for cilium_tools private implementation."""
+
+load(":loadbalancer_pool.bzl", "loadbalancer_pool")
+
+package(default_visibility = ["//visibility:public"])
+
+# Export Starlark files for loading
+exports_files([
+    "loadbalancer_pool.bzl",
+    "cilium_download.bzl",
+])
+
+# Test that the rule loads properly
+loadbalancer_pool(
+    name = "test_pool_rule",
+    nodes = "//private/tests/test_data:single_node.json",
+    pool_name = "test-pool",
+    tags = ["manual"],
+    visibility = ["//visibility:private"],
+)

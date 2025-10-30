@@ -1,0 +1,71 @@
+"""Test targets for cilium_tools module."""
+
+load(":cilium_wait_test.bzl", "cilium_wait_test_suite")
+load(":argument_construction_test.bzl", "argument_construction_test_suite")
+load(":loadbalancer_pool_test.bzl", "loadbalancer_pool_test_suite")
+
+# Tests for cilium_wait macro - creates sh_binary targets that can be inspected
+cilium_wait_test_suite()
+
+# Tests for argument construction - creates shell scripts that verify expected behavior
+argument_construction_test_suite()
+
+# Test data files for loadbalancer pool tests
+filegroup(
+    name = "test_data",
+    srcs = ["//private/tests/test_data:test_data"],
+)
+
+# Tests for cilium_generate_loadbalancer_pool functionality
+loadbalancer_pool_test_suite()
+
+# Filegroup for macro functionality targets (for inspection via bazel query/build)
+filegroup(
+    name = "macro_targets",
+    srcs = [
+        # cilium_wait targets
+        ":test_basic_wait",
+        ":test_with_kubeconfig",
+        ":test_with_context",
+        ":test_with_namespace",
+        ":test_with_all_params",
+        ":test_with_kwargs",
+    ],
+)
+
+# Filegroup for argument construction verification scripts
+filegroup(
+    name = "argument_tests",
+    srcs = [
+        ":test_basic_args",
+        ":test_kubeconfig_arg",
+        ":test_context_arg",
+        ":test_namespace_arg",
+        ":test_all_args",
+    ],
+)
+
+# Filegroup for loadbalancer pool tests
+filegroup(
+    name = "loadbalancer_pool_tests",
+    srcs = [
+        # Validation tests for successful cases
+        ":validate_single_node",
+        ":validate_multi_node",
+        ":validate_ten_network",
+        ":validate_standard_output",
+        # Error handling tests
+        ":test_empty_file_error",
+        ":test_invalid_json_error",
+        ":validate_direct_rule",
+    ],
+)
+
+# Convenience alias for all tests
+filegroup(
+    name = "all_tests",
+    srcs = [
+        ":argument_tests",
+        ":loadbalancer_pool_tests",
+    ],
+)

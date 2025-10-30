@@ -1,0 +1,32 @@
+# Bazel configuration for module
+
+# Common flags
+common --enable_bzlmod
+common --registry=https://bcr.bazel.build
+common --registry=https://raw.githubusercontent.com/bazel-contrib/bazel-central-registry/main
+
+# Build flags
+build --incompatible_strict_action_env
+build --host_platform=@platforms//host
+build --action_env=PATH
+build --verbose_failures
+
+# Test flags
+test --test_output=errors
+test --test_verbose_timeout_warnings
+
+# CI-specific configuration
+# Use with: bazel --output_user_root=.bazel-cache <command> --config=ci
+# Note: startup options like --output_user_root cannot use :config syntax
+common:ci --announce_rc
+# Disable repo contents cache to avoid workspace conflicts in CI
+common:ci --repo_contents_cache=
+build:ci --color=yes  # Keep colors in CI for better readability
+build:ci --show_timestamps
+build:ci --keep_going
+build:ci --jobs=auto
+test:ci --test_output=errors
+test:ci --keep_going
+# Coverage inherits CI settings but will invalidate cache due to different build modes
+coverage:ci --combined_report=lcov
+coverage:ci --coverage_report_generator=@bazel_tools//tools/test:coverage_report_generator
