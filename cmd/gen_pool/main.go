@@ -72,28 +72,32 @@ func extractInternalIP(data []byte) (string, error) {
 	return "", fmt.Errorf("could not find InternalIP in nodes data")
 }
 
-func computePoolCIDR(ip string) (string, error) {
-	// Transform x.y.z.w -> x.y.255.200/29
+func computePoolCIDR(ip string, poolOffset int, poolMask int) (string, error) {
+	// Transform x.y.z.w -> x.y.255.<poolOffset>/<poolMask>
 	parts := strings.Split(ip, ".")
 	if len(parts) != 4 {
 		return "", fmt.Errorf("invalid IP address format: %s", ip)
 	}
-	
-	return fmt.Sprintf("%s.%s.255.200/29", parts[0], parts[1]), nil
+
+	return fmt.Sprintf("%s.%s.255.%d/%d", parts[0], parts[1], poolOffset, poolMask), nil
 }
 
 func main() {
 	var nodesFile string
 	var poolName string
 	var outputFile string
+	var poolOffset int
+	var poolMask int
 
 	flag.StringVar(&nodesFile, "nodes", "", "Path to JSON file containing nodes data")
 	flag.StringVar(&poolName, "pool-name", "", "Name for the CiliumLoadBalancerIPPool resource")
 	flag.StringVar(&outputFile, "output", "-", "Output file path (- for stdout)")
+	flag.IntVar(&poolOffset, "pool-offset", 200, "Third octet of the pool IP (default: 200)")
+	flag.IntVar(&poolMask, "pool-mask", 29, "CIDR mask for the pool (default: 29)")
 	flag.Parse()
 
 	if nodesFile == "" || poolName == "" {
-		fmt.Fprintf(os.Stderr, "Usage: %s -nodes <file> -pool-name <name> [-output <file>]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s -nodes <file> -pool-name <name> [-output <file>] [-pool-offset <offset>] [-pool-mask <mask>]\n", os.Args[0])
 		os.Exit(1)
 	}
 
@@ -112,7 +116,7 @@ func main() {
 	}
 
 	// Compute CIDR
-	poolCIDR, err := computePoolCIDR(internalIP)
+	poolCIDR, err := computePoolCIDR(internalIP, poolOffset, poolMask)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error computing pool CIDR: %v\n", err)
 		os.Exit(1)
