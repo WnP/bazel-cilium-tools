@@ -71,7 +71,7 @@ cilium_generate_loadbalancer_pool(
 
 ### `cilium_wait` Macro
 
-The `cilium_wait` macro creates a `sh_binary` target that runs `cilium status --wait` with optional configuration.
+The `cilium_wait` macro creates a `sh_binary` target that runs `cilium status --wait` with the specified Kubernetes context.
 
 #### Basic Usage
 
@@ -80,6 +80,7 @@ load("@cilium_tools//:defs.bzl", "cilium_wait")
 
 cilium_wait(
     name = "check_cilium_status",
+    context = "my-cluster",
 )
 ```
 
@@ -88,9 +89,9 @@ cilium_wait(
 ```starlark
 cilium_wait(
     name = "check_cilium_status",
+    context = "my-cluster-context",      # Mandatory
     kubeconfig = "/path/to/kubeconfig",  # Optional
-    context = "my-cluster-context",      # Optional
-    namespace = "kube-system",           # Optional, defaults to kube-system
+    namespace = "kube-system",           # Optional
 )
 ```
 

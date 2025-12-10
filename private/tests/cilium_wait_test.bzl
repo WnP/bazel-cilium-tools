@@ -12,12 +12,14 @@ def cilium_wait_test_suite():
     # Test basic usage - should create sh_binary with minimal args
     cilium_wait(
         name = "test_basic_wait",
+        context = "test-context",
         tags = ["manual", "test"],
     )
 
     # Test with kubeconfig parameter
     cilium_wait(
         name = "test_with_kubeconfig",
+        context = "test-context",
         kubeconfig = "test-kubeconfig.yaml",
         tags = ["manual", "test"],
     )
@@ -32,6 +34,7 @@ def cilium_wait_test_suite():
     # Test with namespace parameter
     cilium_wait(
         name = "test_with_namespace",
+        context = "test-context",
         namespace = "test-namespace",
         tags = ["manual", "test"],
     )
@@ -48,6 +51,7 @@ def cilium_wait_test_suite():
     # Test that additional kwargs are passed through
     cilium_wait(
         name = "test_with_kwargs",
+        context = "test-context",
         visibility = ["//visibility:private"],
         tags = ["manual", "test"],
     )

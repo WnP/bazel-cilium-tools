@@ -5,27 +5,24 @@ Provides simple macros for cilium operations via sh_binary.
 
 load("//private:loadbalancer_pool.bzl", "loadbalancer_pool")
 
-def cilium_wait(name, kubeconfig = None, context = None, namespace = None, **kwargs):
+def cilium_wait(name, context, kubeconfig = None, namespace = None, **kwargs):
     """Create a sh_binary target that waits for Cilium to be ready.
 
     Args:
         name: Name of the target
+        context: kubectl context to use (mandatory)
         kubeconfig: Path to kubeconfig file (optional, uses $KUBECONFIG env var if not specified)
-        context: kubectl context to use (optional)
         namespace: Kubernetes namespace (optional)
         **kwargs: Additional arguments passed to sh_binary
-    
+
     Note: To use the KUBECONFIG environment variable, run with:
         bazel run --action_env=KUBECONFIG //:target_name
     """
     # Build cilium status command arguments
-    args = ["status", "--wait"]
+    args = ["status", "--wait", "--context", context]
 
     if kubeconfig:
         args.extend(["--kubeconfig", kubeconfig])
-
-    if context:
-        args.extend(["--context", context])
 
     if namespace:
         args.extend(["--namespace", namespace])
